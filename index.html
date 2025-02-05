@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OneVision Dashboard</title>
+  <!-- Link para o Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Estilos básicos e layout responsivo */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media(min-width: 768px) {
+      .container {
+        grid-template-columns: 1fr 1fr;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .btn {
+      display: block;
+      width: 200px;
+      margin: 20px auto;
+      padding: 10px;
+      text-align: center;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>OneVision Dashboard</h1>
+  <div class="container">
+    <!-- Cartão Taxas de Câmbio -->
+    <div class="card">
+      <h2>Câmbio: Dólar vs Outras Moedas</h2>
+      <div class="chart-container">
+        <canvas id="exchangeChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Cartão Commodities -->
+    <div class="card">
+      <h2>Commodities: Ouro, Petróleo, Trigo e Arroz</h2>
+      <div class="chart-container">
+        <canvas id="commoditiesChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Cartão Temperatura Global (full width) -->
+    <div class="card full-width">
+      <h2>Temperatura Média Global</h2>
+      <div class="chart-container">
+        <canvas id="tempChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Tabela de Dados -->
+    <div class="card full-width">
+      <h2>Tabela de Dados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Indicador</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="dataTable">
+          <!-- Os dados serão inseridos via JavaScript -->
+          <tr>
+            <td>Preço do Ouro</td>
+            <td id="goldPrice">Carregando...</td>
+          </tr>
+          <tr>
+            <td>Temperatura Global (último ano)</td>
+            <td id="globalTemp">Carregando...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <button class="btn" id="updateButton">Atualizar Dados</button>
+
+  <script>
+    // Funções para transformar dados no formato esperado pelo Chart.js
+    function transformExchangeRates(data) {
+      const labels = Object.keys(data.rates);
+      const values = Object.values(data.rates);
+      return {
+        labels: labels,
+        datasets: [{
+          label: "USD vs Outras Moedas",
+          data: values,
+          borderColor: "rgba(75,192,192,1)",
+          backgroundColor: "rgba(75,192,192,0.2)",
+          fill: true,
+          tension: 0.1
+        }]
+      };
+    }
+
+    function transformCommodities(data) {
+      // Considera que a resposta tenha: { data: { XAU: valor, WTI: valor } }
+      const labels = ["Ouro (XAU)", "Petróleo (WTI)", "Trigo", "Arroz"];
+      const values = [
+        data.data && data.data.XAU ? data.data.XAU : 0,
+        data.data && data.data.WTI ? data.data.WTI : 0,
+        5.25,  // valor simulado para trigo
+        3.80   // valor simulado para arroz
+      ];
+      return {
+        labels: labels,
+        datasets: [{
+          label: "Preços das Commodities",
+          data: values,
+          backgroundColor: [
+            "rgba(255, 206, 86, 0.6)",
+            "rgba(54, 162, 235, 0.6)",
+            "rgba(255, 99, 132, 0.6)",
+            "rgba(153, 102, 255, 0.6)"
+          ]
+        }]
+      };
+    }
+
+    function transformGlobalTemp(data) {
+      // Supomos que o endpoint retorne um array de objetos com { year, temperature }
+      const labels = data.map(item => item.year);
+      const values = data.map(item => item.temperature);
+      return {
+        labels: labels,
+        datasets: [{
+          label: "Temperatura Média Global",
+          data: values,
+          borderColor: "rgba(255,99,132,1)",
+          backgroundColor: "rgba(255,99,132,0.2)",
+          fill: true,
+          tension: 0.1
+        }]
+      };
+    }
+
+    // Variáveis para os gráficos
+    let exchangeChart, commoditiesChart, tempChart;
+
+    // Função para criar os gráficos
+    function createCharts(exchangeData, commoditiesData, tempData) {
+      // Cria ou atualiza o gráfico de câmbio
+      const exchangeCtx = document.getElementById("exchangeChart").getContext("2d");
+      if(exchangeChart) {
+        exchangeChart.data = exchangeData;
+        exchangeChart.update();
+      } else {
+        exchangeChart = new Chart(exchangeCtx, {
+          type: 'line',
+          data: exchangeData,
+          options: {}
+        });
+      }
+
+      // Gráfico de commodities
+      const commoditiesCtx = document.getElementById("commoditiesChart").getContext("2d");
+      if(commoditiesChart) {
+        commoditiesChart.data = commoditiesData;
+        commoditiesChart.update();
+      } else {
+        commoditiesChart = new Chart(commoditiesCtx, {
+          type: 'bar',
+          data: commoditiesData,
+          options: {}
+        });
+      }
+
+      // Gráfico de temperatura global
+      const tempCtx = document.getElementById("tempChart").getContext("2d");
+      if(tempChart) {
+        tempChart.data = tempData;
+        tempChart.update();
+      } else {
+        tempChart = new Chart(tempCtx, {
+          type: 'line',
+          data: tempData,
+          options: {}
+        });
+      }
+    }
+
+    // Função para atualizar os dados
+    function updateData() {
+      // URL para a API de câmbio (exchangerate.host)
+      fetch("https://api.exchangerate.host/latest?base=USD")
+        .then(res => res.json())
+        .then(data => {
+          const exchangeData = transformExchangeRates(data);
+          // Atualiza o gráfico de câmbio
+          if(exchangeChart) {
+            exchangeChart.data = exchangeData;
+            exchangeChart.update();
+          } else {
+            createCharts(exchangeData, null, null);
+          }
+        })
+        .catch(err => console.error("Erro na API de câmbio:", err));
+
+      // URL para a API de commodities (commodities-api.com)
+      // Substitua "YOUR_API_KEY" pela sua chave de API
+      fetch("https://commodities-api.com/api/latest?access_key=YOUR_API_KEY&symbols=XAU,WTI")
+        .then(res => res.json())
+        .then(data => {
+          const commoditiesData = transformCommodities(data);
+          // Atualiza o gráfico de commodities
+          if(commoditiesChart) {
+            commoditiesChart.data = commoditiesData;
+            commoditiesChart.update();
+          } else {
+            createCharts(null, commoditiesData, null);
+          }
+          // Atualiza a tabela: preço do ouro
+          document.getElementById("goldPrice").innerText = data.data && data.data.XAU ? `$${data.data.XAU}` : "N/D";
+        })
+        .catch(err => console.error("Erro na API de commodities:", err));
+
+      // URL para a API de temperatura global (exemplo fictício)
+      fetch("https://api.example.com/global-temperature")
+        .then(res => res.json())
+        .then(data => {
+          const tempData = transformGlobalTemp(data);
+          if(tempChart) {
+            tempChart.data = tempData;
+            tempChart.update();
+          } else {
+            createCharts(null, null, tempData);
+          }
+          // Atualiza a tabela: temperatura global (último ano)
+          const lastTemp = data.length ? data[data.length - 1].temperature : "N/D";
+          document.getElementById("globalTemp").innerText = lastTemp !== "N/D" ? `${lastTemp}°C` : "N/D";
+        })
+        .catch(err => {
+          console.error("Erro na API de temperatura global:", err);
+          // Caso a API falhe, usa dados simulados
+          const simulatedData = [
+            { year: 2015, temperature: 14.7 },
+            { year: 2016, temperature: 14.8 },
+            { year: 2017, temperature: 14.9 },
+            { year: 2018, temperature: 15.0 },
+            { year: 2019, temperature: 15.1 },
+            { year: 2020, temperature: 15.2 },
+          ];
+          const tempData = transformGlobalTemp(simulatedData);
+          if(tempChart) {
+            tempChart.data = tempData;
+            tempChart.update();
+          } else {
+            createCharts(null, null, tempData);
+          }
+          // Atualiza a tabela
+          document.getElementById("globalTemp").innerText = `${simulatedData[simulatedData.length - 1].temperature}°C`;
+        });
+    }
+
+    // Evento para o botão de atualizar
+    document.getElementById("updateButton").addEventListener("click", function() {
+      updateData();
+    });
+
+    // Inicializa os gráficos com dados ao carregar a página
+    window.addEventListener("load", function() {
+      updateData();
+    });
+  </script>
+</body>
+</html>
