@@ -26,36 +26,46 @@
       padding: 0 15px;
     }
 
-    .selector {
-      margin-bottom: 20px;
-    }
-
     .chart-container {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
+      justify-content: center;
     }
 
     .chart {
-      background-color: white;
+      background-color: #f3e5f5; /* Fundo roxo claro */
       padding: 15px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      flex: 1 1 calc(50% - 20px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      width: 45%;
+      max-width: 500px;
     }
 
     canvas {
+      display: block;
       max-width: 100%;
-      height: auto;
+      margin: 0 auto;
+    }
+
+    .selector {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .selector label {
+      font-weight: bold;
+      margin-right: 10px;
     }
 
     .content {
       margin-top: 20px;
+      text-align: center;
     }
 
     @media (max-width: 768px) {
       .chart {
-        flex: 1 1 100%;
+        width: 100%;
       }
     }
   </style>
@@ -68,16 +78,6 @@
   </header>
 
   <div class="container">
-    <!-- Seletor de Setor -->
-    <div class="selector">
-      <label for="sector">Escolha o Setor:</label>
-      <select id="sector">
-        <option value="tecnologia">Tecnologia</option>
-        <option value="saude">Saúde</option>
-        <option value="varejo">Varejo</option>
-      </select>
-    </div>
-
     <!-- Gráficos -->
     <div class="chart-container">
       <div class="chart">
@@ -86,6 +86,18 @@
       <div class="chart">
         <canvas id="barChart"></canvas>
       </div>
+    </div>
+
+    <!-- Seletor de Setor (após os gráficos) -->
+    <div class="selector">
+      <label for="sector">Escolha o Setor:</label>
+      <select id="sector">
+        <option value="tecnologia">Tecnologia</option>
+        <option value="saude">Saúde</option>
+        <option value="varejo">Varejo</option>
+        <option value="financeiro">Financeiro</option>
+        <option value="educacao">Educação</option>
+      </select>
     </div>
 
     <!-- Conteúdo Dinâmico -->
@@ -117,10 +129,22 @@
         bar: [25, 35, 45, 55, 65],
         summary: "O setor de Varejo está sendo transformado pelo e-commerce, personalização e experiências omnichannel.",
         opportunities: "Oportunidades incluem lojas virtuais, logística inteligente e marketing personalizado."
+      },
+      financeiro: {
+        line: [12, 22, 32, 42, 52],
+        bar: [18, 28, 38, 48, 58],
+        summary: "O setor Financeiro vem se transformando com fintechs e digitalização, oferecendo soluções inovadoras para transações e investimentos.",
+        opportunities: "Oportunidades incluem bancos digitais, soluções de pagamento e análise de dados financeiros."
+      },
+      educacao: {
+        line: [8, 18, 28, 38, 48],
+        bar: [13, 23, 33, 43, 53],
+        summary: "O setor de Educação está evoluindo com a integração de tecnologias digitais, oferecendo métodos de ensino híbrido e personalizados.",
+        opportunities: "Oportunidades incluem plataformas de e-learning, cursos online e tecnologias educacionais interativas."
       }
     };
 
-    // Inicialização dos gráficos
+    // Inicialização dos gráficos com fundo roxo e legenda abaixo
     const ctxLine = document.getElementById('lineChart').getContext('2d');
     const ctxBar = document.getElementById('barChart').getContext('2d');
 
@@ -128,18 +152,43 @@
       type: 'line',
       data: {
         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-        datasets: [{ label: 'Dados de Linha', data: [], borderColor: '#007BFF', fill: false }]
+        datasets: [{
+          label: 'Dados de Linha',
+          data: [],
+          borderColor: '#007BFF',
+          backgroundColor: 'rgba(0, 123, 255, 0.2)',
+          fill: true,
+          tension: 0.4
+        }]
       },
-      options: { responsive: true }
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
     });
 
     let barChart = new Chart(ctxBar, {
       type: 'bar',
       data: {
         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-        datasets: [{ label: 'Dados de Barra', data: [], backgroundColor: '#28A745' }]
+        datasets: [{
+          label: 'Dados de Barra',
+          data: [],
+          backgroundColor: '#28A745'
+        }]
       },
-      options: { responsive: true }
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
     });
 
     // Atualizar conteúdo dinamicamente
@@ -157,7 +206,7 @@
       lineChart.update();
       barChart.update();
 
-      // Atualizar texto
+      // Atualizar textos
       sectorTitle.textContent = `Resumo do Setor: ${selectedSector.charAt(0).toUpperCase() + selectedSector.slice(1)}`;
       sectorSummary.textContent = data[selectedSector].summary;
       sectorOpportunities.textContent = data[selectedSector].opportunities;
@@ -165,6 +214,8 @@
 
     // Carregar conteúdo inicial
     sectorSelector.dispatchEvent(new Event('change'));
+
+    // Nota: Não foi possível identificar quem criou originalmente este código com as informações disponíveis.
   </script>
 </body>
 </html>
