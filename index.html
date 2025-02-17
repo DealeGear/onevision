@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneVision - Decisões Inteligentes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #007BFF;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .selector {
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .chart {
+      background-color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      flex: 1 1 calc(50% - 20px);
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .content {
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .chart {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>OneVision</h1>
+    <p>Transformando Dados em Decisões Inteligentes</p>
+  </header>
+
+  <div class="container">
+    <!-- Seletor de Setor -->
+    <div class="selector">
+      <label for="sector">Escolha o Setor:</label>
+      <select id="sector">
+        <option value="tecnologia">Tecnologia</option>
+        <option value="saude">Saúde</option>
+        <option value="varejo">Varejo</option>
+      </select>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="chart-container">
+      <div class="chart">
+        <canvas id="lineChart"></canvas>
+      </div>
+      <div class="chart">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Conteúdo Dinâmico -->
+    <div class="content">
+      <h2 id="sector-title">Resumo do Setor</h2>
+      <p id="sector-summary">Selecione um setor para ver o resumo.</p>
+      <h3>Oportunidades</h3>
+      <p id="sector-opportunities">Selecione um setor para ver as oportunidades.</p>
+    </div>
+  </div>
+
+  <script>
+    // Dados fictícios para os gráficos
+    const data = {
+      tecnologia: {
+        line: [10, 20, 30, 40, 50],
+        bar: [15, 25, 35, 45, 55],
+        summary: "O setor de Tecnologia é altamente inovador e cresce rapidamente, impulsionado por avanços em IA, cloud computing e automação.",
+        opportunities: "Oportunidades incluem desenvolvimento de software personalizado, segurança cibernética e soluções de IoT."
+      },
+      saude: {
+        line: [5, 15, 25, 35, 45],
+        bar: [10, 20, 30, 40, 50],
+        summary: "O setor de Saúde está em constante evolução, com foco em telemedicina, biotecnologia e cuidados preventivos.",
+        opportunities: "Oportunidades incluem tecnologias de diagnóstico avançado, dispositivos médicos inteligentes e serviços de bem-estar digital."
+      },
+      varejo: {
+        line: [20, 30, 40, 50, 60],
+        bar: [25, 35, 45, 55, 65],
+        summary: "O setor de Varejo está sendo transformado pelo e-commerce, personalização e experiências omnichannel.",
+        opportunities: "Oportunidades incluem lojas virtuais, logística inteligente e marketing personalizado."
+      }
+    };
+
+    // Inicialização dos gráficos
+    const ctxLine = document.getElementById('lineChart').getContext('2d');
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+
+    let lineChart = new Chart(ctxLine, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+        datasets: [{ label: 'Dados de Linha', data: [], borderColor: '#007BFF', fill: false }]
+      },
+      options: { responsive: true }
+    });
+
+    let barChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+        datasets: [{ label: 'Dados de Barra', data: [], backgroundColor: '#28A745' }]
+      },
+      options: { responsive: true }
+    });
+
+    // Atualizar conteúdo dinamicamente
+    const sectorSelector = document.getElementById('sector');
+    const sectorTitle = document.getElementById('sector-title');
+    const sectorSummary = document.getElementById('sector-summary');
+    const sectorOpportunities = document.getElementById('sector-opportunities');
+
+    sectorSelector.addEventListener('change', () => {
+      const selectedSector = sectorSelector.value;
+
+      // Atualizar gráficos
+      lineChart.data.datasets[0].data = data[selectedSector].line;
+      barChart.data.datasets[0].data = data[selectedSector].bar;
+      lineChart.update();
+      barChart.update();
+
+      // Atualizar texto
+      sectorTitle.textContent = `Resumo do Setor: ${selectedSector.charAt(0).toUpperCase() + selectedSector.slice(1)}`;
+      sectorSummary.textContent = data[selectedSector].summary;
+      sectorOpportunities.textContent = data[selectedSector].opportunities;
+    });
+
+    // Carregar conteúdo inicial
+    sectorSelector.dispatchEvent(new Event('change'));
+  </script>
+</body>
+</html>
