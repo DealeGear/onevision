@@ -4,68 +4,168 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OneVision - Decisões Inteligentes</title>
+  <!-- Fonte moderna do Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f9f9f9;
+      background-color: #f4f6f8;
       color: #333;
+      line-height: 1.6;
     }
-
+    
     header {
-      background-color: #007BFF;
-      color: white;
+      background: linear-gradient(135deg, #007BFF, #0056b3);
+      color: #fff;
+      padding: 20px 0;
       text-align: center;
-      padding: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
+    
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+      font-weight: 600;
+    }
+    
+    header p {
+      margin: 5px 0 0;
+      font-size: 1.1em;
+    }
+    
+    nav {
+      margin-top: 10px;
+    }
+    
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    
+    nav a:hover {
+      color: #ffd700; /* cor de destaque */
+    }
+    
     .container {
       max-width: 1200px;
-      margin: 20px auto;
+      margin: 100px auto 20px; /* margem superior para compensar o header fixo */
       padding: 0 15px;
     }
-
+    
     .chart-container {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
       justify-content: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
     }
-
+    
     .chart {
-      background-color: #f3e5f5; /* Fundo roxo claro */
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background-color: #f3e5f5; /* fundo roxo claro */
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       width: 45%;
       max-width: 500px;
+      transition: transform 0.3s;
     }
-
+    
+    .chart:hover {
+      transform: translateY(-5px);
+    }
+    
     canvas {
       display: block;
       max-width: 100%;
       margin: 0 auto;
     }
-
+    
     .selector {
-      margin-top: 20px;
       text-align: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+      animation-delay: 0.4s;
     }
-
+    
     .selector label {
-      font-weight: bold;
+      font-weight: 600;
       margin-right: 10px;
     }
-
-    .content {
-      margin-top: 20px;
-      text-align: center;
+    
+    .selector select {
+      padding: 8px 12px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s, transform 0.3s;
+      outline: none;
     }
-
+    
+    .selector select:focus,
+    .selector select:hover {
+      border-color: #007BFF;
+      transform: scale(1.02);
+    }
+    
+    .content {
+      text-align: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+      animation-delay: 0.8s;
+    }
+    
+    .content h2 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    
+    footer {
+      background-color: #0056b3;
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+      margin-top: 40px;
+    }
+    
+    footer p {
+      margin: 5px 0;
+    }
+    
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
     @media (max-width: 768px) {
       .chart {
         width: 100%;
+      }
+      header h1 {
+        font-size: 2em;
+      }
+      nav a {
+        margin: 0 10px;
       }
     }
   </style>
@@ -75,9 +175,14 @@
   <header>
     <h1>OneVision</h1>
     <p>Transformando Dados em Decisões Inteligentes</p>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contato">Contato</a>
+    </nav>
   </header>
-
-  <div class="container">
+  
+  <div class="container" id="home">
     <!-- Gráficos -->
     <div class="chart-container">
       <div class="chart">
@@ -87,7 +192,7 @@
         <canvas id="barChart"></canvas>
       </div>
     </div>
-
+    
     <!-- Seletor de Setor (após os gráficos) -->
     <div class="selector">
       <label for="sector">Escolha o Setor:</label>
@@ -99,7 +204,7 @@
         <option value="educacao">Educação</option>
       </select>
     </div>
-
+    
     <!-- Conteúdo Dinâmico -->
     <div class="content">
       <h2 id="sector-title">Resumo do Setor</h2>
@@ -108,7 +213,32 @@
       <p id="sector-opportunities">Selecione um setor para ver as oportunidades.</p>
     </div>
   </div>
-
+  
+  <!-- Seção Sobre -->
+  <div class="container" id="sobre">
+    <div class="content">
+      <h2>Sobre Nós</h2>
+      <p>A OneVision é pioneira na transformação de dados em decisões inteligentes. Utilizamos tecnologia de ponta para fornecer insights precisos e soluções inovadoras.</p>
+    </div>
+  </div>
+  
+  <!-- Seção Contato -->
+  <div class="container" id="contato">
+    <div class="content">
+      <h2>Contato</h2>
+      <p>Entre em contato conosco pelo e-mail <a href="mailto:contato@onevision.com" style="color: #007BFF;">contato@onevision.com</a> ou siga nossas redes sociais.</p>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2025 OneVision. Todos os direitos reservados.</p>
+    <p>Siga-nos: 
+      <a href="#" style="color: #ffd700; text-decoration: none;">Facebook</a> | 
+      <a href="#" style="color: #ffd700; text-decoration: none;">Twitter</a> | 
+      <a href="#" style="color: #ffd700; text-decoration: none;">LinkedIn</a>
+    </p>
+  </footer>
+  
   <script>
     // Dados fictícios para os gráficos
     const data = {
@@ -199,13 +329,11 @@
 
     sectorSelector.addEventListener('change', () => {
       const selectedSector = sectorSelector.value;
-
       // Atualizar gráficos
       lineChart.data.datasets[0].data = data[selectedSector].line;
       barChart.data.datasets[0].data = data[selectedSector].bar;
       lineChart.update();
       barChart.update();
-
       // Atualizar textos
       sectorTitle.textContent = `Resumo do Setor: ${selectedSector.charAt(0).toUpperCase() + selectedSector.slice(1)}`;
       sectorSummary.textContent = data[selectedSector].summary;
@@ -214,8 +342,6 @@
 
     // Carregar conteúdo inicial
     sectorSelector.dispatchEvent(new Event('change'));
-
-    // Nota: Não foi possível identificar quem criou originalmente este código com as informações disponíveis.
   </script>
 </body>
 </html>
