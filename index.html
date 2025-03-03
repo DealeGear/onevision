@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneVision Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        canvas {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+    </div>
+    <div class="grid-container">
+        <canvas id="chart1"></canvas>
+        <canvas id="chart2"></canvas>
+        <canvas id="chart3"></canvas>
+        <canvas id="chart4"></canvas>
+        <canvas id="chart5"></canvas>
+        <canvas id="chart6"></canvas>
+        <canvas id="chart7"></canvas>
+        <canvas id="chart8"></canvas>
+    </div>
+
+    <script>
+        const createChart = (ctx, type, dataKey) => {
+            return new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+                    datasets: [{
+                        label: dataKey,
+                        data: [10, 20, 15, 30, 25, 35, 40],
+                        backgroundColor: "rgba(75, 192, 192, 0.2)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        };
+
+        createChart(document.getElementById("mainChart"), "line", "População Mundial");
+        createChart(document.getElementById("chart1"), "bar", "Dados 1");
+        createChart(document.getElementById("chart2"), "pie", "Dados 2");
+        createChart(document.getElementById("chart3"), "doughnut", "Dados 3");
+        createChart(document.getElementById("chart4"), "radar", "Dados 4");
+        createChart(document.getElementById("chart5"), "polarArea", "Dados 5");
+        createChart(document.getElementById("chart6"), "bar", "Dados 6");
+        createChart(document.getElementById("chart7"), "pie", "Dados 7");
+        createChart(document.getElementById("chart8"), "line", "Dados 8");
+    </script>
+</body>
+</html>
