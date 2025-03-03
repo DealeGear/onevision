@@ -1,86 +1,381 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OneVision Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f4f4f4;
-        }
-        .chart-container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px;
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px;
-        }
-        canvas {
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneVision - Decisões Inteligentes</title>
+  <!-- Fonte moderna do Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary-color: #007BFF;
+      --secondary-color: #0056b3;
+      --highlight-color: #ffd700;
+      --background-color: #f4f6f8;
+      --dark-bg-color: #2c1e3d;
+      --light-bg-color: #f3e5f5;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: #fff;
+      padding: 20px 0;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+      font-weight: 600;
+    }
+    
+    header p {
+      margin: 5px 0 0;
+      font-size: 1.1em;
+    }
+    
+    nav {
+      margin-top: 10px;
+    }
+    
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    
+    nav a:hover {
+      color: var(--highlight-color);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 100px auto 20px;
+      padding: 0 15px;
+    }
+
+    /* Animação de FadeIn */
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Container dos gráficos */
+    .chart-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+    }
+    
+    /* Infográfico de Linhas */
+    .infographic-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+      background-color: var(--dark-bg-color);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 45%;
+      max-width: 900px;
+      position: relative;
+    }
+
+    /* Canvas do gráfico de linhas */
+    #lineChart {
+      width: 550px;
+      height: 400px;
+      display: block;
+      position: relative;
+      z-index: 10;
+    }
+    
+    /* Legenda customizada */
+    .custom-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 250px;
+      color: #fff;
+      position: absolute;
+      top: 20px;
+      right: 10px;
+      z-index: 5;
+    }
+
+    .legend-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .legend-color {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      margin-top: 3px;
+    }
+    .legend-text {
+      line-height: 1.4;
+    }
+
+    /* Gráfico de Barras */
+    .chart {
+      background-color: var(--light-bg-color);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 45%;
+      max-width: 500px;
+      transition: transform 0.3s;
+      position: relative;
+    }
+    .chart:hover {
+      transform: translateY(-5px);
+    }
+
+    canvas {
+      max-width: 100%;
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* Seletor de Setor */
+    .selector {
+      text-align: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+      animation-delay: 0.4s;
+    }
+
+    .selector label {
+      font-weight: 600;
+      margin-right: 10px;
+    }
+
+    .selector select {
+      padding: 8px 12px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s, transform 0.3s;
+      outline: none;
+    }
+
+    .selector select:focus,
+    .selector select:hover {
+      border-color: var(--primary-color);
+      transform: scale(1.02);
+    }
+
+    /* Conteúdo Dinâmico */
+    .content {
+      text-align: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+      animation-delay: 0.8s;
+    }
+
+    .content h2 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--secondary-color);
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+      margin-top: 40px;
+    }
+
+    footer p {
+      margin: 5px 0;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .chart-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .infographic-container,
+      .chart {
+        width: 100%;
+        max-width: 100%;
+      }
+      #lineChart {
+        width: 100% !important;
+        height: auto !important;
+      }
+      header h1 {
+        font-size: 2em;
+      }
+      nav a {
+        margin: 0 10px;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <header>
+    <h1>OneVision</h1>
+    <p>Transformando Dados em Decisões Inteligentes</p>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </header>
+  
+  <div class="container" id="home">
     <div class="chart-container">
-        <canvas id="mainChart"></canvas>
+      <div class="infographic-container">
+        <canvas id="lineChart" aria-label="Gráfico de Linha de Produtos"></canvas>
+        <div class="custom-legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #f44336;"></div>
+            <div class="legend-text">
+              <strong>Product 01</strong><br />
+              Descrição curta sobre o primeiro produto.
+            </div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #4caf50;"></div>
+            <div class="legend-text">
+              <strong>Product 02</strong><br />
+              Descrição curta sobre o segundo produto.
+            </div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #2196f3;"></div>
+            <div class="legend-text">
+              <strong>Product 03</strong><br />
+              Descrição curta sobre o terceiro produto.
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chart">
+        <canvas id="barChart"></canvas>
+      </div>
     </div>
-    <div class="grid-container">
-        <canvas id="chart1"></canvas>
-        <canvas id="chart2"></canvas>
-        <canvas id="chart3"></canvas>
-        <canvas id="chart4"></canvas>
-        <canvas id="chart5"></canvas>
-        <canvas id="chart6"></canvas>
-        <canvas id="chart7"></canvas>
-        <canvas id="chart8"></canvas>
+    
+    <div class="selector">
+      <label for="sector">Escolha o Setor:</label>
+      <select id="sector">
+        <option value="tecnologia">Tecnologia</option>
+        <option value="saude">Saúde</option>
+        <option value="varejo">Varejo</option>
+        <option value="financeiro">Financeiro</option>
+        <option value="educacao">Educação</option>
+      </select>
     </div>
+    
+    <div class="content">
+      <h2 id="sector-title">Resumo do Setor</h2>
+      <p id="sector-summary">Selecione um setor para ver o resumo.</p>
+      <h3>Oportunidades</h3>
+      <p id="sector-opportunities">Selecione um setor para ver as oportunidades.</p>
+    </div>
+  </div>
 
-    <script>
-        const createChart = (ctx, type, dataKey) => {
-            return new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-                    datasets: [{
-                        label: dataKey,
-                        data: [10, 20, 15, 30, 25, 35, 40],
-                        backgroundColor: "rgba(75, 192, 192, 0.2)",
-                        borderColor: "rgba(75, 192, 192, 1)",
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        };
+  <div class="container" id="sobre">
+    <div class="content">
+      <h2>Sobre Nós</h2>
+      <p>A OneVision é pioneira na transformação de dados em decisões inteligentes. Utilizamos tecnologia de ponta para fornecer insights precisos e soluções inovadoras.</p>
+    </div>
+  </div>
+  
+  <div class="container" id="contato">
+    <div class="content">
+      <h2>Contato</h2>
+      <p>Entre em contato conosco pelo e-mail <a href="mailto:contato@onevision.com" style="color: var(--primary-color);">contato@onevision.com</a> ou siga nossas redes sociais.</p>
+    </div>
+  </div>
 
-        createChart(document.getElementById("mainChart"), "line", "População Mundial");
-        createChart(document.getElementById("chart1"), "bar", "Dados 1");
-        createChart(document.getElementById("chart2"), "pie", "Dados 2");
-        createChart(document.getElementById("chart3"), "doughnut", "Dados 3");
-        createChart(document.getElementById("chart4"), "radar", "Dados 4");
-        createChart(document.getElementById("chart5"), "polarArea", "Dados 5");
-        createChart(document.getElementById("chart6"), "bar", "Dados 6");
-        createChart(document.getElementById("chart7"), "pie", "Dados 7");
-        createChart(document.getElementById("chart8"), "line", "Dados 8");
-    </script>
+  <footer>
+    <p>&copy; 2025 OneVision - Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // Função para criar o gráfico de forma reutilizável
+    function createChart(ctx, type, data, options) {
+      return new Chart(ctx, {
+        type: type,
+        data: data,
+        options: options
+      });
+    }
+
+    const lineChartData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+      datasets: [
+        { label: 'Product 01', data: [12, 19, 10, 25, 30], borderColor: '#f44336', fill: false },
+        { label: 'Product 02', data: [9, 15, 13, 23, 25], borderColor: '#4caf50', fill: false },
+        { label: 'Product 03', data: [5, 10, 8, 20, 18], borderColor: '#2196f3', fill: false }
+      ]
+    };
+
+    const barChartData = {
+      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+      datasets: [{
+        label: 'Revenue',
+        data: [50, 75, 90, 100],
+        backgroundColor: '#007BFF',
+        borderRadius: 10
+      }]
+    };
+
+    const lineChartOptions = {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { x: { beginAtZero: true }, y: { beginAtZero: true } }
+    };
+
+    const barChartOptions = {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true }, y: { beginAtZero: true } }
+    };
+
+    const lineChartCtx = document.getElementById('lineChart').getContext('2d');
+    const barChartCtx = document.getElementById('barChart').getContext('2d');
+
+    createChart(lineChartCtx, 'line', lineChartData, lineChartOptions);
+    createChart(barChartCtx, 'bar', barChartData, barChartOptions);
+  </script>
 </body>
 </html>
